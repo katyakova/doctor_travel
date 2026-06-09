@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Login — Marketing Dashboard</title>
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+</head>
+<body>
+  <main class="login-page">
+    <div class="login-card">
+      <h1>Marketing Dashboard</h1>
+      <form id="loginForm" autocomplete="off">
+        <label>
+          Имя пользователя
+          <input type="text" id="username" required />
+        </label>
+        <label>
+          Пароль
+          <input type="password" id="password" required />
+        </label>
+        <div class="row">
+          <button type="submit" class="btn primary">Войти</button>
+        </div>
+        <p id="error" class="error" aria-live="polite"></p>
+      </form>
+      <p class="small">Версия: локальная. Для безопасности используйте сервер в проде.</p>
+    </div>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>
