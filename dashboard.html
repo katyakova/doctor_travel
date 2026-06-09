@@ -3,51 +3,241 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Dashboard — Marketing</title>
-  <link rel="stylesheet" href="css/variables.css" />
-  <link rel="stylesheet" href="css/layout.css" />
+  <title>Marketing Dashboard</title>
+  <!-- Можно оставить layout.css для базовых стилей форм/кнопок, если нужно -->
+  <link rel="stylesheet" href="css/dashboard-theme.css" />
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">Marketing Dashboard</div>
-    <div class="actions">
-      <button id="exportPdfBtn" class="btn">Экспорт в PDF</button>
-      <button id="logoutBtn" class="btn danger">Выйти</button>
-    </div>
-  </header>
-
-  <nav class="periods">
-    <!-- Кнопки периодов будут динамически рендериться -->
-    <button class="period-btn" data-period="2025-04">Апрель 2025</button>
-    <button class="period-btn active" data-period="2025-05">Май 2025</button>
-    <button class="period-btn" data-period="2025-06">Июнь 2025</button>
-  </nav>
-
-  <main id="app" class="dashboard-main">
-    <section class="summary">
-      <h2>Сводка</h2>
-      <div class="kpi-cards">
-        <!-- Карточки KPI: динамически -->
-        <div class="kpi">Загрузка данных...</div>
+  <div class="dashboard">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand__mark">MD</div>
+        <div>
+          <div class="brand__title">Marketing</div>
+          <div class="brand__subtitle">Ежемесячный отчет</div>
+        </div>
       </div>
-    </section>
 
-    <section id="blocks">
-      <!-- Блоки для Instagram, Facebook, Метрика, Битрикс, Продажи и т.д. -->
-      <div class="block">Здесь появятся блоки метрик</div>
-    </section>
-  </main>
+      <nav class="nav">
+        <button class="nav__item nav__item--active" type="button" data-section="overview">
+          Сводка
+        </button>
+        <button class="nav__item" type="button" data-section="instagram">
+          Instagram
+        </button>
+        <button class="nav__item" type="button" data-section="facebook">
+          Facebook Ads
+        </button>
+        <button class="nav__item" type="button" data-section="metrika">
+          Яндекс Метрика
+        </button>
+        <button class="nav__item" type="button" data-section="bitrix">
+          Битрикс CRM
+        </button>
+        <button class="nav__item" type="button" data-section="sales">
+          Продажи
+        </button>
+        <button class="nav__item" type="button" data-section="insights">
+          Выводы
+        </button>
+      </nav>
+
+      <div class="sidebar__footer">
+        <div>Текущий пользователь: <span id="currentUser"></span></div>
+        <button id="logoutBtn" class="btn btn--ghost" style="margin-top:1rem;">Выйти</button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h1 class="page-title">Маркетинговый дашборд</h1>
+          <p class="page-subtitle" id="periodSubtitle">
+            Период: Май 2025 vs Апрель 2025
+          </p>
+        </div>
+        <div style="display:flex;gap:0.75rem;align-items:center;">
+          <select id="periodSelect" class="select">
+            <!-- Опции периодов будут подставляться скриптом -->
+            <option value="2025-05" selected>Май 2025</option>
+            <option value="2025-04">Апрель 2025</option>
+          </select>
+          <button id="exportPdfBtn" class="btn btn--primary">Экспорт в PDF</button>
+        </div>
+      </header>
+
+      <!-- Сводные KPI -->
+      <section id="section-overview">
+        <div class="grid grid--stats" id="summaryKpi">
+          <!-- Пример карточки KPI -->
+          <article class="card">
+            <div class="card__body">
+              <div class="card__label">Лиды (всего)</div>
+              <div class="card__value" id="kpiTotalLeads">—</div>
+              <div class="card__delta" id="kpiTotalLeadsDelta">Δ vs прошлый месяц: —</div>
+              <div class="card__accent"></div>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card__body">
+              <div class="card__label">Продажи (шт.)</div>
+              <div class="card__value" id="kpiSales">—</div>
+              <div class="card__delta" id="kpiSalesDelta">Δ vs прошлый месяц: —</div>
+              <div class="card__accent"></div>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card__body">
+              <div class="card__label">Охват Instagram</div>
+              <div class="card__value" id="kpiInstaReach">—</div>
+              <div class="card__delta" id="kpiInstaReachDelta">Δ vs прошлый месяц: —</div>
+              <div class="card__accent"></div>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="card__body">
+              <div class="card__label">Бюджет Facebook Ads</div>
+              <div class="card__value" id="kpiFbSpend">—</div>
+              <div class="card__delta" id="kpiFbSpendDelta">Δ vs прошлый месяц: —</div>
+              <div class="card__accent"></div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- Instagram -->
+      <section id="section-instagram" style="display:none;">
+        <article class="card panel">
+          <div class="panel__header">
+            <h2 class="panel__title">Instagram</h2>
+            <div class="panel__meta">Охват, подписчики, вовлеченность, топ-посты</div>
+          </div>
+          <div id="instagramContent">
+            Загрузка данных Instagram...
+          </div>
+        </article>
+      </section>
+
+      <!-- Facebook Ads -->
+      <section id="section-facebook" style="display:none;">
+        <article class="card panel">
+          <div class="panel__header">
+            <h2 class="panel__title">Facebook Ads</h2>
+            <div class="panel__meta">Платная реклама: reach, clicks, CTR, заявки</div>
+          </div>
+          <div id="facebookContent">
+            Загрузка данных Facebook Ads...
+          </div>
+        </article>
+      </section>
+
+      <!-- Яндекс Метрика -->
+      <section id="section-metrika" style="display:none;">
+        <article class="card panel">
+          <div class="panel__header">
+            <h2 class="panel__title">Яндекс Метрика</h2>
+            <div class="panel__meta">Трафик, поведение, конверсии</div>
+          </div>
+          <div id="metrikaContent">
+            Загрузка данных Яндекс Метрики...
+          </div>
+        </article>
+      </section>
+
+      <!-- Битрикс -->
+      <section id="section-bitrix" style="display:none;">
+        <article class="card panel">
+          <div class="panel__header">
+            <h2 class="panel__title">Битрикс CRM</h2>
+            <div class="panel__meta">Воронка, источники лидов, статусы</div>
+          </div>
+          <div id="bitrixContent">
+            Загрузка данных Битрикс...
+          </div>
+        </article>
+      </section>
+
+      <!-- Продажи -->
+      <section id="section-sales" style="display:none;">
+        <article class="card panel">
+          <div class="panel__header">
+            <h2 class="panel__title">Продажи</h2>
+            <div class="panel__meta">Сверка с CRM, динамика продаж</div>
+          </div>
+          <div id="salesContent">
+            Загрузка данных продаж...
+          </div>
+        </article>
+      </section>
+
+      <!-- Выводы -->
+      <section id="section-insights" style="display:none;">
+        <article class="card panel">
+          <div class="panel__header">
+            <h2 class="panel__title">Выводы и рекомендации</h2>
+            <div class="panel__meta">Автоматические выводы + ваши комментарии</div>
+          </div>
+
+          <div id="autoInsights" style="margin-bottom:1.5rem;">
+            Автоматические инсайты появятся после загрузки данных.
+          </div>
+
+          <div>
+            <label class="card__label" for="manualNotes">Ваши выводы и комментарии:</label>
+            <textarea id="manualNotes" class="input" rows="5" placeholder="Добавьте свои выводы по результатам месяца..."></textarea>
+          </div>
+        </article>
+      </section>
+    </main>
+  </div>
 
   <script>
-    // Простая защита: проверяем токен в sessionStorage
+    // Простая защита: редирект, если нет токена
     (function checkAuth() {
       if (!sessionStorage.getItem('md_auth')) {
         window.location.href = 'index.html';
       }
     })();
+
+    // Навигация по секциям (sidebar)
+    document.addEventListener('DOMContentLoaded', function () {
+      const user = sessionStorage.getItem('md_user') || 'Гость';
+      const userEl = document.getElementById('currentUser');
+      if (userEl) userEl.textContent = user;
+
+      const navItems = document.querySelectorAll('.nav__item');
+      const sections = {
+        overview: document.getElementById('section-overview'),
+        instagram: document.getElementById('section-instagram'),
+        facebook: document.getElementById('section-facebook'),
+        metrika: document.getElementById('section-metrika'),
+        bitrix: document.getElementById('section-bitrix'),
+        sales: document.getElementById('section-sales'),
+        insights: document.getElementById('section-insights')
+      };
+
+      navItems.forEach(item => {
+        item.addEventListener('click', () => {
+          const target = item.getAttribute('data-section');
+          // active-класс
+          navItems.forEach(i => i.classList.remove('nav__item--active'));
+          item.classList.add('nav__item--active');
+          // переключаем секции
+          Object.keys(sections).forEach(key => {
+            sections[key].style.display = key === target ? 'block' : 'none';
+          });
+        });
+      });
+    });
   </script>
+
   <script src="js/config.js"></script>
   <script src="js/auth.js"></script>
-  <!-- Дальше будут скрипты для загрузки данных, рендера и т.д. -->
+  <!-- дальше будут модули: periods.js, dataLoader.js и т.д. -->
 </body>
 </html>
