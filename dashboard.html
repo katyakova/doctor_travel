@@ -199,6 +199,28 @@
     </main>
   </div>
 
+
+  <script>
+  // cache-bust и диагностика для CSS
+  (function(){
+    // Найти link с dashboard-theme.css и обновить href с меткой времени
+    const links = Array.from(document.querySelectorAll('link[rel="stylesheet"]'));
+    links.forEach(l => {
+      if (l.href && l.href.indexOf('dashboard-theme.css') !== -1) {
+        const base = l.href.split('?')[0];
+        l.href = base + '?v=' + Date.now();
+        console.log('Updated CSS href ->', l.href);
+      }
+    });
+
+    // Выведем содержимое (первые 300 символов) для проверки — удобно в DevTools Console
+    fetch('css/dashboard-theme.css?v=' + Date.now())
+      .then(r => r.ok ? r.text() : Promise.reject(r.status))
+      .then(t => console.log('dashboard-theme.css loaded, length:', t.length, '\nPreview:\n', t.slice(0,300)))
+      .catch(e => console.warn('Не удалось загрузить css/dashboard-theme.css:', e));
+  })();
+</script>
+
   <script>
     // Проверка авторизации
     (function checkAuth() {
