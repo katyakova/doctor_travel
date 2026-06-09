@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Тест данных Битрикс</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+
+    h1 { color: #333; }
+    h2 { color: #555; margin-top: 30px; }
+    h3 { color: #777; margin-top: 20px; }
+
+    .card {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 10px 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .metric {
+      display: inline-block;
+      background: #4361ee;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      margin: 5px;
+      font-size: 14px;
+    }
+
+    .metric span {
+      display: block;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th {
+      background: #4361ee;
+      color: white;
+      padding: 8px 12px;
+      text-align: left;
+    }
+
+    td {
+      padding: 7px 12px;
+      border-bottom: 1px solid #eee;
+    }
+
+    tr:hover td { background: #f9f9f9; }
+
+    .tag {
+      display: inline-block;
+      background: #e8f4fd;
+      color: #2196F3;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      margin: 2px;
+    }
+
+    .tag.green  { background: #e8f5e9; color: #4CAF50; }
+    .tag.red    { background: #ffebee; color: #f44336; }
+    .tag.orange { background: #fff3e0; color: #FF9800; }
+
+    .status {
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .status.ok     { background: #e8f5e9; color: #4CAF50; }
+    .status.error  { background: #ffebee; color: #f44336; }
+    .status.warn   { background: #fff3e0; color: #FF9800; }
+
+    .section { margin-bottom: 40px; }
+
+    pre {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 15px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 12px;
+    }
+
+    .btn {
+      background: #4361ee;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      margin: 5px;
+    }
+
+    .btn:hover { background: #3451d1; }
+    .btn.red   { background: #f44336; }
+
+    #log {
+      background: #1e1e1e;
+      color: #00ff00;
+      padding: 15px;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 12px;
+      min-height: 100px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🔍 Проверка данных Битрикс</h1>
+  <p>Эта страница показывает что именно загружается из твоих файлов</p>
+
+  <!-- Кнопки запуска -->
+  <div class="card">
+    <button class="btn" onclick="runTest()">
+      ▶ Загрузить и проверить данные
+    </button>
+    <button class="btn red" onclick="clearLog()">
+      🗑 Очистить лог
+    </button>
+  </div>
+
+  <!-- Лог загрузки -->
+  <div class="card">
+    <h2>📋 Лог загрузки</h2>
+    <div id="log">Нажми кнопку "Загрузить и проверить данные"...</div>
+  </div>
+
+  <!-- Статус файлов -->
+  <div class="card section" id="filesStatus" style="display:none">
+    <h2>📁 Статус файлов</h2>
+    <div id="filesStatusContent"></div>
+  </div>
+
+  <!-- Найденные колонки -->
+  <div class="card section" id="columnsSection" style="display:none">
+    <h2>📊 Найденные колонки в файлах</h2>
+    <div id="columnsContent"></div>
+  </div>
+
+  <!-- Уникальные значения -->
+  <div class="card section" id="valuesSection" style="display:none">
+    <h2>🏷 Уникальные значения важных полей</h2>
+    <div id="valuesContent"></div>
+  </div>
+
+  <!-- Главные метрики -->
+  <div class="card section" id="metricsSection" style="display:none">
+    <h2>📈 Главные метрики</h2>
+    <div id="metricsContent"></div>
+  </div>
+
+  <!-- Таблицы данных -->
+  <div class="card section" id="tablesSection" style="display:none">
+    <h2>📋 Первые строки данных</h2>
+    <div id="tablesContent"></div>
+  </div>
+
+  <!-- Результаты обработки -->
+  <div class="card section" id="resultsSection" style="display:none">
+    <h2>✅ Результаты обработки</h2>
+    <div id="resultsContent"></div>
+  </div>
+
+  <!-- Подключаем скрипты -->
+  <script src="libs/xlsx.min.js"></script>
+  <script src="js/dataLoader.js"></script>
+  <script src="js/bitrix.js"></script>
+
+  <script>
+
+    // ==========================================
+    // ЛОГ
+    // ==========================================
+    function log(message, type = 'info') {
+      const logEl = document.getElementById('log');
+      const colors = {
+        info:    '#00ff00',
+        warn:    '#ffff00',
+        error:   '#ff4444',
+        success: '#00ffff',
+        title:   '#ff9900',
+      };
+      const color = colors[type] || colors.info;
+      const time  = new Date().toLocaleTimeString();
+      logEl.innerHTML += `<div style="color:${color}">[${time}] ${message}</div>`;
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function clearLog() {
+      document.getElementById('log').innerHTML = '';
+    }
+
+    // ==========================================
+    // ГЛАВНАЯ ФУНКЦИЯ ТЕСТА
+    // ==========================================
+    async function runTest() {
+      clearLog();
+      log('Начинаю проверку данных...', 'title');
+      log('', 'info');
+
+      const PERIOD = '2025-05'; // ← ИЗМЕНИ если нужно
+
+      // --- Шаг 1: Проверяем загрузку файлов ---
+      log('ШАГ 1: Загружаю файлы...', 'title');
+
+      const files = {
+        active:      `data/${PERIOD}/bitrix_active.csv`,
+        lost:        `data/${PERIOD}/bitrix_lost.csv`,
+        prepayments: `data/${PERIOD}/prepayments.csv`,
+      };
+
+      const rawData = {};
+      const fileStatuses = {};
+
+      for (const [key, path] of Object.entries(files)) {
+        try {
+          const rows = await DataLoader.loadFile(path);
+          rawData[key]       = rows;
+          fileStatuses[key]  = {
+            path,
+            status: rows.length > 0 ? 'ok' : 'warn',
+            rows:   rows.length,
+            cols:   rows.length > 0 ? Object.keys(rows[0]).length : 0,
+          };
+          log(`✅ ${path} — загружено ${rows.length} строк`, 'success');
+        } catch (e) {
+          rawData[key]      = [];
+          fileStatuses[key] = { path, status: 'error', rows: 0, cols: 0 };
+          log(`❌ ${path} — ошибка: ${e.message}`, 'error');
+        }
+      }
+
+      // --- Шаг 2: Показываем статус файлов ---
+      showFileStatuses(fileStatuses);
+
+      // --- Шаг 3: Показываем колонки ---
+      log('', 'info');
+      log('ШАГ 2: Анализирую колонки...', 'title');
+      showColumns(rawData);
+
+      // --- Шаг 4: Показываем уникальные значения ---
+      log('', 'info');
+      log('ШАГ 3: Ищу уникальные значения важных полей...', 'title');
+      showUniqueValues(rawData);
+
+      // --- Шаг 5: Показываем первые строки ---
+      log('', 'info');
+      log('ШАГ 4: Показываю первые 3 строки каждого файла...', 'title');
+      showRawTables(rawData);
+
+      // --- Шаг 6: Запускаем BitrixModule ---
+      log('', 'info');
+      log('ШАГ 5: Запускаю BitrixModule...', 'title');
+
+      try {
+        const metrics = await BitrixModule.loadPeriod(PERIOD);
+        log('✅ BitrixModule загружен успешно!', 'success');
+        showMetrics(metrics);
+        showResults(metrics);
+      } catch (e) {
+        log(`❌ Ошибка BitrixModule: ${e.message}`, 'error');
+        console.error(e);
+      }
+
+      log('', 'info');
+      log('✅ Проверка завершена!', 'title');
+    }
+
+    // ==========================================
+    // ОТРИСОВКА: СТАТУС ФАЙЛОВ
+    // ==========================================
+    function showFileStatuses(statuses) {
+      const el = document.getElementById('filesStatusContent');
+      const statusLabels = {
+        ok:    { text: '✅ Загружен',      css: 'ok' },
+        warn:  { text: '⚠️ Пустой файл',  css: 'warn' },
+        error: { text: '❌ Не найден',     css: 'error' },
+      };
+
+      const names = {
+        active:      'Активные сделки (bitrix_active.csv)',
+        lost:        'Отказники (bitrix_lost.csv)',
+        prepayments: 'Предоплаты бухгалтера (prepayments.csv)',
+      };
+
+      let html = '<table><tr><th>Файл</th><th>Путь</th><th>Строк</th><th>Колонок</th><th>Статус</th></tr>';
+
+      for (const [key, info] of Object.entries(statuses)) {
+        const s = statusLabels[info.status];
+        html += `
+          <tr>
+            <td><b>${names[key]}</b></td>
+            <td><code>${info.path}</code></td>
+            <td>${info.rows}</td>
+            <td>${info.cols}</td>
+            <td><span class="status ${s.css}">${s.text}</span></td>
+          </tr>
+        `;
+      }
+
+      html += '</table>';
+      el.innerHTML = html;
+      document.getElementById('filesStatus').style.display = 'block';
+    }
+
+    // ==========================================
+    // ОТРИСОВКА: КОЛОНКИ ФАЙЛОВ
+    // ==========================================
+    function showColumns(rawData) {
+      const el = document.getElementById('columnsContent');
+      const names = {
+        active:      '📋 Активные сделки (bitrix_active.csv)',
+        lost:        '📋 Отказники (bitrix_lost.csv)',
+        prepayments: '📋 Предоплаты (prepayments.csv)',
+      };
+
+      // Важные колонки которые мы ищем
+      const importantCols = [
+        'Контакт: Источник',
+        'Источник',
+        'Стадия сделки',
+        'Название сделки',
+        'тип тура',
+        'Причина отказа',
+        'Сумма',
+        'Дата создания',
+        'Ответственный',
+        'Контакт',
+      ];
+
+      let html = '';
+
+      for (const [key, rows] of Object.entries(rawData)) {
+        if (rows.length === 0) {
+          html += `<h3>${names[key]}</h3><p style="color:#f44336">Файл не загружен или пустой</p>`;
+          continue;
+        }
+
+        const cols = Object.keys(rows[0]);
+        html += `<h3>${names[key]} — ${cols.length} колонок</h3><div>`;
+
+        cols.forEach(col => {
+          const isImportant = importantCols.some(ic =>
+            col.toLowerCase().includes(ic.toLowerCase()) ||
+            ic.toLowerCase().includes(col.toLowerCase())
+          );
+          html += `<span class="tag ${isImportant ? 'green' : ''}">${col}</span>`;
+        });
+
+        html += '</div>';
+
+        // Проверяем наличие важных колонок
+        html += '<div style="margin-top:10px">';
+        importantCols.forEach(ic => {
+          const found = cols.find(c =>
+            c.toLowerCase().includes(ic.toLowerCase()) ||
+            ic.toLowerCase().includes(c.toLowerCase())
+          );
+          if (found) {
+            html += `<div style="color:#4CAF50;font-size:13px">✅ "${ic}" → найдена как "${found}"</div>`;
+            log(`  ✅ ${names[key].split('(')[0]}: найдена колонка "${found}"`, 'success');
+          } else if (['Контакт: Источник','Стадия сделки','Название сделки'].includes(ic)) {
+            // Критически важные колонки
+            html += `<div style="color:#f44336;font-size:13px">❌ "${ic}" → НЕ НАЙДЕНА (важная!)</div>`;
+            log(`  ❌ ${names[key].split('(')[0]}: колонка "${ic}" не найдена!`, 'error');
+          }
+        });
+        html += '</div><br>';
+      }
+
+      el.innerHTML = html;
+      document.getElementById('columnsSection').style.display = 'block';
+    }
+
+    // ==========================================
+    // ОТРИСОВКА: УНИКАЛЬНЫЕ ЗНАЧЕНИЯ
+    // ==========================================
+    function showUniqueValues(rawData) {
+      const el = document.getElementById('valuesContent');
+      let html = '';
+
+      const checkFields = [
+        { key: 'active', col: 'Контакт: Источник', label: 'Источники (активные)' },
+        { key: 'lost',   col: 'Контакт: Источник', label: 'Источники (отказники)' },
+        { key: 'active', col: 'Стадия сделки',      label: 'Стадии сделок' },
+        { key: 'active', col: 'тип тура',            label: 'Типы туров' },
+        { key: 'lost',   col: 'Причина отказа',      label: 'Причины отказов' },
+        { key: 'active', col: 'Название сделки',     label: 'Примеры названий (активные)' },
+        { key: 'prepayments', col: 'Направление',    label: 'Направления (предоплаты)' },
+      ];
+
+      checkFields.forEach(({ key, col, label }) => {
+        const rows = rawData[key];
+        if (!rows || rows.length === 0) return;
+
+        const values = DataLoader.utils.getUniqueValues(rows, col);
+        if (values.length === 0) {
+          // Пробуем найти похожую колонку
+          const allCols = Object.keys(rows[0]);
+          const similar = allCols.find(c => c.toLowerCase().includes(col.toLowerCase().split(':')[0]));
+          if (similar) {
+            const altValues = DataLoader.utils.getUniqueValues(rows, similar);
+            html += `<h3>⚠️ ${label} (колонка "${similar}")</h3><div>`;
+            altValues.slice(0, 20).forEach(v => {
+              html += `<span class="tag orange">${v}</span>`;
+            });
+            html += '</div><br>';
+          }
+          return;
+        }
+
+        html += `<h3>${label} — ${values.length} уникальных значений</h3><div>`;
+        values.slice(0, 30).forEach(v => {
+          html += `<span class="tag">${v || '(пусто)'}</span>`;
+        });
+        if (values.length > 30) {
+          html += `<span class="tag orange">+ ещё ${values.length - 30}...</span>`;
+        }
+        html += '</div><br>';
+
+        log(`  📌 ${label}: ${values.slice(0, 5).join(', ')}${values.length > 5 ? '...' : ''}`, 'info');
+      });
+
+      el.innerHTML = html;
+      document.getElementById('valuesSection').style.display = 'block';
+    }
+
+    // ==========================================
+    // ОТРИСОВКА: ПЕРВЫЕ СТРОКИ
+    // ==========================================
+    function showRawTables(rawData) {
+      const el = document.getElementById('tablesContent');
+      const names = {
+        active:      'Активные сделки',
+        lost:        'Отказники',
+        prepayments: 'Предоплаты',
+      };
+
+      let html = '';
+
+      for (const [key, rows] of Object.entries(rawData)) {
+        if (rows.length === 0) continue;
+
+        const preview  = rows.slice(0, 3);
+        const cols     = Object.keys(rows[0]);
+        const showCols = cols.slice(0, 8); // показываем первые 8 колонок
+
+        html += `<h3>${names[key]} — первые 3 строки</h3>`;
+        html += '<div style="overflow-x:auto"><table>';
+        html += '<tr>' + showCols.map(c => `<th>${c}</th>`).join('') + '</tr>';
+
+        preview.forEach(row => {
+          html += '<tr>' + showCols.map(c =>
+            `<td>${String(row[c] || '').substring(0, 40)}</td>`
+          ).join('') + '</tr>';
+        });
+
+        html += '</table></div>';
+        if (cols.length > 8) {
+          html += `<p style="color:#999;font-size:12px">+ ещё ${cols.length - 8} колонок скрыто</p>`;
+        }
+        html += '<br>';
+      }
+
+      el.innerHTML = html;
+      document.getElementById('tablesSection').style.display = 'block';
+    }
+
+    // ==========================================
+    // ОТРИСОВКА: ГЛАВНЫЕ МЕТРИКИ
+    // ==========================================
+    function showMetrics(metrics) {
+      const s   = metrics.summary;
+      const el  = document.getElementById('metricsContent');
+
+      el.innerHTML = `
+        <div>
+          <div class="metric">
+            Всего заявок
+            <span>${s.totalLeads}</span>
+          </div>
+          <div class="metric" style="background:#2196F3">
+            В работе
+            <span>${s.totalActive}</span>
+          </div>
+          <div class="metric" style="background:#f44336">
+            Отказников
+            <span>${s.totalLost}</span>
+          </div>
+          <div class="metric" style="background:#4CAF50">
+            Стали клиентами (CRM)
+            <span>${s.clientsInCRM}</span>
+          </div>
+          <div class="metric" style="background:#9C27B0">
+            Предоплат (бухгалтер)
+            <span>${s.prepCount}</span>
+          </div>
+          <div class="metric" style="background:#FF9800">
+            Конверсия в работу
+            <span>${s.conversionToWork}%</span>
+          </div>
+          <div class="metric" style="background:#009688">
+            Конверсия в клиента
+            <span>${s.conversionToClient}%</span>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('metricsSection').style.display = 'block';
+    }
+
+    // ==========================================
+    // ОТРИСОВКА: ДЕТАЛЬНЫЕ РЕЗУЛЬТАТЫ
+    // ==========================================
+    function showResults(metrics) {
+      const el = document.getElementById('resultsContent');
+      let html = '';
+
+      // По источникам
+      if (metrics.bySource.length > 0) {
+        html += '<h3>📡 Заявки по источникам</h3>';
+        html += '<table><tr><th>Источник</th><th>Заявок</th><th>В работе</th><th>Отказ</th><th>Клиентов</th><th>Конверсия</th></tr>';
+        metrics.bySource.forEach(s => {
+          html += `<tr>
+            <td>${s.name}</td>
+            <td><b>${s.leads}</b></td>
+            <td>${s.active}</td>
+            <td>${s.lost}</td>
+            <td><b>${s.clients}</b></td>
+            <td>${s.conversionToClient}%</td>
+          </tr>`;
+        });
+        html += '</table><br>';
+      }
+
+      // По направлениям
+      if (metrics.byDestination.length > 0) {
+        html += '<h3>🌍 Заявки по направлениям</h3>';
+        html += '<table><tr><th>Направление</th><th>Заявок</th><th>В работе</th><th>Отказ</th></tr>';
+        metrics.byDestination.forEach(d => {
+          html += `<tr>
+            <td>${d.name}</td>
+            <td><b>${d.leads}</b></td>
+            <td>${d.active}</td>
+            <td>${d.lost}</td>
+          </tr>`;
+        });
+        html += '</table><br>';
+      }
+
+      // По типу тура
+      if (metrics.byTourType.length > 0) {
+        html += '<h3>🎒 По типу тура</h3>';
+        html += '<table><tr><th>Тип</th><th>Всего</th><th>В работе</th><th>Отказ</th></tr>';
+        metrics.byTourType.forEach(t => {
+          html += `<tr>
+            <td>${t.name}</td>
+            <td><b>${t.count}</b></td>
+            <td>${t.active}</td>
+            <td>${t.lost}</td>
+          </tr>`;
+        });
+        html += '</table><br>';
+      }
+
+      // Причины отказов
+      if (metrics.lostReasons.length > 0) {
+        html += '<h3>❌ Причины отказов</h3>';
+        html += '<table><tr><th>Причина</th><th>Количество</th><th>%</th></tr>';
+        metrics.lostReasons.forEach(r => {
+          html += `<tr>
+            <td>${r.reason}</td>
+            <td><b>${r.count}</b></td>
+            <td>${r.percent}%</td>
+          </tr>`;
+        });
+        html += '</table><br>';
+      }
+
+      el.innerHTML = html;
+      document.getElementById('resultsSection').style.display = 'block';
+    }
+
+  </script>
+
+</body>
+</html>
