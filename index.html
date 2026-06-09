@@ -3,29 +3,34 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Login — Marketing Dashboard</title>
-  <link rel="stylesheet" href="css/variables.css" />
-  <link rel="stylesheet" href="css/layout.css" />
+  <title>Вход — Marketing Dashboard</title>
+  <link rel="stylesheet" href="css/login.css" />
 </head>
 <body>
-  <main class="login-page">
-    <div class="login-card">
-      <h1>Marketing Dashboard</h1>
+  <main class="login-shell">
+    <div class="login-inner">
+      <h1 class="login-title">Marketing Dashboard</h1>
+      <p class="login-subtitle">Войдите, чтобы посмотреть отчет по маркетингу за выбранный месяц.</p>
+
       <form id="loginForm" autocomplete="off">
-        <label>
+        <label class="login-label">
           Имя пользователя
-          <input type="text" id="username" required />
+          <input type="text" id="username" class="login-input" required />
         </label>
-        <label>
+
+        <label class="login-label">
           Пароль
-          <input type="password" id="password" required />
+          <input type="password" id="password" class="login-input" required />
         </label>
-        <div class="row">
-          <button type="submit" class="btn primary">Войти</button>
+
+        <div class="login-row">
+          <button type="submit" class="btn btn-primary">Войти</button>
         </div>
-        <p id="error" class="error" aria-live="polite"></p>
+
+        <p id="error" class="login-error" aria-live="polite"></p>
       </form>
-      <p class="small">Версия: локальная. Для безопасности используйте сервер в проде.</p>
+
+      <p class="login-meta">Доступ ограничен. Используйте выданные вам логин и пароль.</p>
     </div>
   </main>
 
