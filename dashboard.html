@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dashboard — Marketing</title>
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Marketing Dashboard</div>
+    <div class="actions">
+      <button id="exportPdfBtn" class="btn">Экспорт в PDF</button>
+      <button id="logoutBtn" class="btn danger">Выйти</button>
+    </div>
+  </header>
+
+  <nav class="periods">
+    <!-- Кнопки периодов будут динамически рендериться -->
+    <button class="period-btn" data-period="2025-04">Апрель 2025</button>
+    <button class="period-btn active" data-period="2025-05">Май 2025</button>
+    <button class="period-btn" data-period="2025-06">Июнь 2025</button>
+  </nav>
+
+  <main id="app" class="dashboard-main">
+    <section class="summary">
+      <h2>Сводка</h2>
+      <div class="kpi-cards">
+        <!-- Карточки KPI: динамически -->
+        <div class="kpi">Загрузка данных...</div>
+      </div>
+    </section>
+
+    <section id="blocks">
+      <!-- Блоки для Instagram, Facebook, Метрика, Битрикс, Продажи и т.д. -->
+      <div class="block">Здесь появятся блоки метрик</div>
+    </section>
+  </main>
+
+  <script>
+    // Простая защита: проверяем токен в sessionStorage
+    (function checkAuth() {
+      if (!sessionStorage.getItem('md_auth')) {
+        window.location.href = 'index.html';
+      }
+    })();
+  </script>
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <!-- Дальше будут скрипты для загрузки данных, рендера и т.д. -->
+</body>
+</html>
