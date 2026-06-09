@@ -4,12 +4,11 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Marketing Dashboard</title>
-  <!-- Можно оставить layout.css для базовых стилей форм/кнопок, если нужно -->
   <link rel="stylesheet" href="css/dashboard-theme.css" />
 </head>
 <body>
   <div class="dashboard">
-    <!-- SIDEBAR -->
+    <!-- Боковое меню -->
     <aside class="sidebar">
       <div class="brand">
         <div class="brand__mark">MD</div>
@@ -44,12 +43,12 @@
       </nav>
 
       <div class="sidebar__footer">
-        <div>Текущий пользователь: <span id="currentUser"></span></div>
+        <div>Пользователь: <span id="currentUser"></span></div>
         <button id="logoutBtn" class="btn btn--ghost" style="margin-top:1rem;">Выйти</button>
       </div>
     </aside>
 
-    <!-- MAIN -->
+    <!-- Основная область -->
     <main class="main">
       <header class="topbar">
         <div>
@@ -58,9 +57,10 @@
             Период: Май 2025 vs Апрель 2025
           </p>
         </div>
+
         <div style="display:flex;gap:0.75rem;align-items:center;">
           <select id="periodSelect" class="select">
-            <!-- Опции периодов будут подставляться скриптом -->
+            <!-- Пример, позже заменим на динамический -->
             <option value="2025-05" selected>Май 2025</option>
             <option value="2025-04">Апрель 2025</option>
           </select>
@@ -68,10 +68,9 @@
         </div>
       </header>
 
-      <!-- Сводные KPI -->
+      <!-- Сводка -->
       <section id="section-overview">
-        <div class="grid grid--stats" id="summaryKpi">
-          <!-- Пример карточки KPI -->
+        <div class="grid grid--stats">
           <article class="card">
             <div class="card__body">
               <div class="card__label">Лиды (всего)</div>
@@ -128,7 +127,7 @@
         <article class="card panel">
           <div class="panel__header">
             <h2 class="panel__title">Facebook Ads</h2>
-            <div class="panel__meta">Платная реклама: reach, clicks, CTR, заявки</div>
+            <div class="panel__meta">Reach, clicks, CTR, заявки, стоимость</div>
           </div>
           <div id="facebookContent">
             Загрузка данных Facebook Ads...
@@ -141,7 +140,7 @@
         <article class="card panel">
           <div class="panel__header">
             <h2 class="panel__title">Яндекс Метрика</h2>
-            <div class="panel__meta">Трафик, поведение, конверсии</div>
+            <div class="panel__meta">Источники трафика, поведение, конверсия</div>
           </div>
           <div id="metrikaContent">
             Загрузка данных Яндекс Метрики...
@@ -149,7 +148,7 @@
         </article>
       </section>
 
-      <!-- Битрикс -->
+      <!-- Битрикс CRM -->
       <section id="section-bitrix" style="display:none;">
         <article class="card panel">
           <div class="panel__header">
@@ -157,7 +156,7 @@
             <div class="panel__meta">Воронка, источники лидов, статусы</div>
           </div>
           <div id="bitrixContent">
-            Загрузка данных Битрикс...
+            Загрузка данных CRM...
           </div>
         </article>
       </section>
@@ -167,7 +166,7 @@
         <article class="card panel">
           <div class="panel__header">
             <h2 class="panel__title">Продажи</h2>
-            <div class="panel__meta">Сверка с CRM, динамика продаж</div>
+            <div class="panel__meta">Факт продаж, сверка с CRM</div>
           </div>
           <div id="salesContent">
             Загрузка данных продаж...
@@ -188,8 +187,9 @@
           </div>
 
           <div>
-            <label class="card__label" for="manualNotes">Ваши выводы и комментарии:</label>
-            <textarea id="manualNotes" class="input" rows="5" placeholder="Добавьте свои выводы по результатам месяца..."></textarea>
+            <label class="card__label" for="manualNotes">Ваши выводы:</label>
+            <textarea id="manualNotes" class="input" rows="5"
+              placeholder="Добавьте свои выводы по результатам месяца..."></textarea>
           </div>
         </article>
       </section>
@@ -197,19 +197,21 @@
   </div>
 
   <script>
-    // Простая защита: редирект, если нет токена
+    // Проверка авторизации
     (function checkAuth() {
       if (!sessionStorage.getItem('md_auth')) {
         window.location.href = 'index.html';
       }
     })();
 
-    // Навигация по секциям (sidebar)
     document.addEventListener('DOMContentLoaded', function () {
-      const user = sessionStorage.getItem('md_user') || 'Гость';
+      // отображаем пользователя
       const userEl = document.getElementById('currentUser');
-      if (userEl) userEl.textContent = user;
+      if (userEl) {
+        userEl.textContent = sessionStorage.getItem('md_user') || 'Гость';
+      }
 
+      // навигация по секциям
       const navItems = document.querySelectorAll('.nav__item');
       const sections = {
         overview: document.getElementById('section-overview'),
@@ -224,10 +226,9 @@
       navItems.forEach(item => {
         item.addEventListener('click', () => {
           const target = item.getAttribute('data-section');
-          // active-класс
           navItems.forEach(i => i.classList.remove('nav__item--active'));
           item.classList.add('nav__item--active');
-          // переключаем секции
+
           Object.keys(sections).forEach(key => {
             sections[key].style.display = key === target ? 'block' : 'none';
           });
@@ -238,6 +239,5 @@
 
   <script src="js/config.js"></script>
   <script src="js/auth.js"></script>
-  <!-- дальше будут модули: periods.js, dataLoader.js и т.д. -->
 </body>
 </html>
