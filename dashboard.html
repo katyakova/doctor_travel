@@ -15,6 +15,15 @@
   
 </head>
 <body>
+
+  <!-- Библиотеки -->
+<script src="libs/xlsx.min.js"></script>
+<script src="libs/chart.min.js"></script>
+
+<!-- Наши модули — строго в этом порядке -->
+<script src="js/dataLoader.js"></script>   <!-- 1. сначала загрузчик -->
+<script src="js/bitrix.js"></script>       <!-- 2. потом битрикс -->
+<script src="js/app.js"></script>          <!-- 3. потом главный файл -->
   
   <div class="dashboard">
     <!-- Боковое меню -->
